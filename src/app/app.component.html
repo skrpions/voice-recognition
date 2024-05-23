@@ -30,22 +30,36 @@
       <!-- src/app/app.component.html -->
       <button (click)="checkMicPermission()">Solicitar Permiso de Micrófono</button>
 
-
-      <button (click)="startVoiceRecognition()">Start</button>
-      <button (click)="stopVoiceRecognition()">Stop</button>
-
-      <input [(ngModel)]="numbers[0]" placeholder="Número 1">
-      <input [(ngModel)]="numbers[1]" placeholder="Número 2">
-      <input [(ngModel)]="numbers[2]" placeholder="Número 3">
-
-      <button (click)="sumNumbers()">Sumar Números</button>
-
-      <!--  <p *ngIf="result">Resultado: {{result}}</p> -->
     </div>
     <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
       <div class="pill-group">
         <h1>{{ title }}</h1>
+
+        <div>
+          <button (click)="startVoiceRecognition()">Start</button>
+          <button (click)="stopVoiceRecognition()">Stop</button>
+        </div>
+        <div>
+          <form [formGroup]="numberForm">
+            <div>
+              <label for="number1">Número 1:</label>
+              <input id="number1" formControlName="number1" />
+            </div>
+            <div>
+              <label for="number2">Número 2:</label>
+              <input id="number2" formControlName="number2" />
+            </div>
+            <div>
+              <label for="number3">Número 3:</label>
+              <input id="number3" formControlName="number3" />
+            </div>
+          </form>
+        </div>
+        <div>
+          <p> Total: <span *ngIf="sum !== null">{{ sum }}</span> </p>
+        </div>
+
 
         <p>{{number}} 🎉</p>
       </div>
