@@ -1,27 +1,28 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
+
 declare var webkitSpeechRecognition: any;
+
 @Injectable({
   providedIn: 'root',
 })
 export class VoiceRecognitionService {
   recognition = new webkitSpeechRecognition();
   isStoppedSpeechRecognition = false;
-  text = '';
-  tempWords: any;
+  number = '';
+  tempWords: string | null = null;
 
-  private textSubject = new Subject<string>();
-  text$ = this.textSubject.asObservable(); // Observable que se puede suscribir en el componente
+  private numberSubject = new Subject<string>();
+  number$ = this.numberSubject.asObservable();
 
   constructor() {
     this.init();
   }
 
   init() {
-    // this.recognition.continuous = true;
     this.recognition.interimResults = true;
     this.recognition.lang = 'es-ES';
-    //this.recognition.maxAlternatives = 1;
+    this.recognition.maxAlternatives = 1; // Configura el número máximo de alternativas
 
     this.recognition.addEventListener('result', (e: any) => {
       const transcript = Array.from(e.results)
@@ -29,8 +30,15 @@ export class VoiceRecognitionService {
         .map((result) => result.transcript)
         .join('');
 
-      this.tempWords = transcript;
-      console.log(transcript);
+      // Filtrar solo números incluyendo puntos decimales
+      const numberMatch = transcript.match(/\d+(\.\d+)?/g);
+      if (numberMatch) {
+        this.tempWords = numberMatch.join(' ');
+        console.log('Recognized numbers:', this.tempWords);
+      } else {
+        this.tempWords = null; // Reset tempWords if no number is found
+        console.log(transcript);
+      }
     });
 
     this.recognition.addEventListener('end', () => {
@@ -39,22 +47,17 @@ export class VoiceRecognitionService {
         this.recognition.start();
       }
     });
+
+    // Manejo de errores
+    this.recognition.addEventListener('error', (event: any) => {
+      console.error('Error de reconocimiento de voz:', event.error);
+    });
   }
 
   start() {
     this.isStoppedSpeechRecognition = false;
     this.recognition.start();
     console.log('Speech recognition started');
-
-    /* this.recognition.addEventListener('end', (condition: any) => {
-      if (!this.isStoppedSpeechRecognition) {
-        this.recognition.stop();
-        console.log('End Speech Recognition');
-      } else {
-        this.wordConcat();
-        this.recognition.start();
-      }
-    }); */
   }
 
   stop() {
@@ -64,12 +67,13 @@ export class VoiceRecognitionService {
     console.log('Speech recognition stopped');
   }
 
-  wordConcat() {
-    //this.text += this.tempWords;
-    this.text = this.text + ' ' + this.tempWords + '.';
-    this.tempWords = '';
+  private wordConcat() {
+    if (this.tempWords !== null) {
+      this.number += this.tempWords + ' ';
+      this.tempWords = null;
+    }
 
-    // Emitir el nuevo valor de text
-    this.textSubject.next(this.text); // Emitir el nuevo valor de text
+    // Emitir el nuevo valor de number
+    this.numberSubject.next(this.number); // Emitir el nuevo valor de number
   }
 }

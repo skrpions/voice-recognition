@@ -13,8 +13,8 @@ declare var annyang: any;
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  title = 'voice-recognition';
-  text: string = '';
+  title = 'voice-recognition-numbers';
+  number: string = '';
 
   numbers: number[] = [];
   result: number | null = null;
@@ -25,9 +25,9 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.voiceSrv.text$.subscribe((newText: string) => {
-      console.log('New text received:', newText); // Añadir un log para verificar la recepción del texto
-      this.text = newText;
+    this.voiceSrv.number$.subscribe((number: string) => {
+      console.log('New number received:', number); // Añadir un log para verificar la recepción del numbero
+      this.number = number;
     });
   }
 
