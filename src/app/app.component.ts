@@ -16,35 +16,26 @@ export class AppComponent implements OnInit {
   title = 'voice-recognition-numbers';
   number: string = '';
   sum: number | null = null;
-  numberForm: FormGroup;
+  reactiveForm: FormGroup;
+  arrayNumbers: string[] = [];
 
   constructor(
     private voiceSrv: VoiceRecognitionService,
     private audioService: AudioService,
     private fb: FormBuilder
   ) {
-    this.numberForm = this.fb.group({
+    this.reactiveForm = this.fb.group({
       number1: [''],
       number2: [''],
       number3: [''],
     });
   }
-
   ngOnInit() {
     this.voiceSrv.number$.subscribe((number: string) => {
       console.log('New number received:', number);
       this.number = number;
-      const numberArray = number.trim().split(' ');
-
-      let inputIndex = 0;
-
-      numberArray.forEach((num) => {
-        if (inputIndex < 3) {
-          const controlName = `number${inputIndex + 1}`;
-          this.numberForm.controls[controlName].setValue(num);
-          inputIndex++;
-        }
-      });
+      const numberReceived = number.trim().split(' ').filter(Boolean); // Filtra valores vacíos
+      this.updateInputValues(numberReceived);
     });
 
     this.voiceSrv.sum$.subscribe((newSum: number) => {
@@ -52,8 +43,22 @@ export class AppComponent implements OnInit {
       this.sum = newSum;
 
       // Resetear formulario después de calcular la suma
-      this.numberForm.reset();
+      this.reactiveForm.reset();
     });
+  }
+
+  private updateInputValues(number: string[]): void {
+    if (number[0]) {
+      this.arrayNumbers.push(number[0]);
+      console.log('✅ Number Received: ', number);
+      console.log('✅ Array Numbers: ', this.arrayNumbers);
+      for (let i = 0; i < 3; i++) {
+        const controlName = `number${i + 1}`;
+        const value = this.arrayNumbers[i] || ''; // Usa un valor vacío si no hay suficientes números
+        console.log(`Setting ${controlName} to ${value}`); // Añade esta línea para depuración
+        this.reactiveForm.get(controlName)?.setValue(value);
+      }
+    }
   }
 
   startVoiceRecognition(): void {

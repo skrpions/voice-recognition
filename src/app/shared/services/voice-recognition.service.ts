@@ -50,10 +50,11 @@ export class VoiceRecognitionService {
         this.calculateSum();
       } else {
         this.processTranscript(finalTranscript);
+        // Emitimos el número final reconocido
+        this.numberSubject.next(finalTranscript.trim());
       }
 
       this.currentInterimTranscript = interimTranscript;
-      this.numberSubject.next(this.currentInterimTranscript.trim());
     });
 
     this.recognition.addEventListener('end', () => {
